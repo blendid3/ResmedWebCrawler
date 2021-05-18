@@ -1,5 +1,7 @@
+import flask
 import scrapy
 from flask import Flask, redirect
+flask.helpers._endpoint_from_view_func = flask.scaffold._endpoint_from_view_func
 from flask_restful import Api, Resource, reqparse
 import os
 import requests
@@ -7,6 +9,7 @@ import json
 import time
 import random
 import logging
+
 
 app = Flask(__name__)
 api = Api(app)
