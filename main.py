@@ -31,11 +31,11 @@ SERVER_URL = {
     "PROD": "http://us1-airtmc-m03.ec2.local:8080"
 }
 
-proxies = {
-    'http': 'http://proxy.ec2.local:32611',
-    'https': 'http://proxy.ec2.local:32611',
-}
-
+# proxies = {
+#     'http': 'http://proxy.ec2.local:32611',
+#     'https': 'http://proxy.ec2.local:32611',
+# }
+proxies = []
 
 def formatMsg(queue_list, context_type):
     for q in queue_list:
@@ -55,7 +55,7 @@ def sendSlackNotification(channelName, msg):
     postData['message'] = msg
     postData['color'] = 'red'
     url = 'http://us1-airmgo-t01.ec2.local/notificationToHipchat?room=' + channelName
-    requests.post(url, data=postData, proxies=proxies)
+    requests.post(url, data=postData)
 
 
 def sendAlert(env, queue_list):
