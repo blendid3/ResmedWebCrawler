@@ -151,6 +151,7 @@ class RTViewTokenizer():
                 return tokenLists;
             else:
                 tokenLists.append(token);
+        self.index = 0;
 
     def getMetaInfo(self, tokenList, start_index):
         infoLists = []
@@ -242,10 +243,30 @@ class RTViewTokenizer():
                 InfoMap[key].append(ele[i])
         return InfoMap;
 
-
+# tuple: ("pendingMessageCout: ")
 if __name__ == '__main__':
+    ## pendingMessageCount
+    ## pendingMessageSize
     t1 = RTViewTokenizer();
-    InfoMap = t1.getInfoMap()
+    for i in range(5):
+
+        InfoMap = t1.getInfoMap() ## not update
+        lists_1 = InfoMap["pendingMessageCount"].copy();
+        lists_1.sort(reverse=True)
+        print("pendingMessageCount : " + str(lists_1[:10]))
+
+        lists_2 = InfoMap["inboundTotalMessages"].copy();
+        lists_2.sort(reverse=True)
+        print("inboundTotalMessages: " + str(lists_2[:10]))
+
+    # note: 1. getInfoMap update the response
+    # 2. top 10 -> name
+    # 3. add monitor alarm -> call to slack, email;
+    # 4, python3 call slack notification
+    #
+
+
+
     new_path = "InfoMap.txt"
-    with open(new_path, 'w') as outFile:
-        outFile.write(str(InfoMap))
+    # with open(new_path, 'w') as outFile:
+    #     outFile.write(str(InfoMap))
