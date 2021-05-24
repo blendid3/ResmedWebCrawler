@@ -243,21 +243,45 @@ class RTViewTokenizer():
                 InfoMap[key].append(ele[i])
         return InfoMap;
 
+    # return (name, topNumber)
+    def getTopDatas(self, InfoMap, key, num):
+        key_lists = InfoMap[key]
+        for ele in key_lists:
+            assert isinstance(ele, float)
+        test_lists = [];
+        for i in range(len(key_lists)):
+            test_lists.append((i, key_lists[i]))
+
+        new_list = sorted(test_lists, key=lambda x: x[1], reverse=True)[:num]
+        res = []
+        name_list = InfoMap['name']
+        for ele in new_list:
+            val  = ele[1];
+            name = name_list[ele[0]]
+            res.append((name, val))
+            pass
+        return res;
+        pass
+
+
 # tuple: ("pendingMessageCout: ")
 if __name__ == '__main__':
     ## pendingMessageCount
     ## pendingMessageSize
     t1 = RTViewTokenizer();
-    for i in range(5):
-
-        InfoMap = t1.getInfoMap() ## not update
-        lists_1 = InfoMap["pendingMessageCount"].copy();
-        lists_1.sort(reverse=True)
-        print("pendingMessageCount : " + str(lists_1[:10]))
-
-        lists_2 = InfoMap["inboundTotalMessages"].copy();
-        lists_2.sort(reverse=True)
-        print("inboundTotalMessages: " + str(lists_2[:10]))
+    InfoMap = t1.getInfoMap()
+    res = t1.getTopDatas(InfoMap, "pendingMessageCount", 10)
+    print(res)
+    # for i in range(5):
+    #
+    #     InfoMap = t1.getInfoMap() ## not update
+    #     lists_1 = InfoMap["pendingMessageCount"].copy();
+    #     lists_1.sort(reverse=True)
+    #     print("pendingMessageCount : " + str(lists_1[:10]))
+    #
+    #     lists_2 = InfoMap["inboundTotalMessages"].copy();
+    #     lists_2.sort(reverse=True)
+    #     print("inboundTotalMessages: " + str(lists_2[:10]))
 
     # note: 1. getInfoMap update the response
     # 2. top 10 -> name
