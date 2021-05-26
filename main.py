@@ -1,6 +1,6 @@
 import requests
 from requests.auth import HTTPBasicAuth
-
+# from botocore.vendored import requests
 class Token():
     def __init__(self, type, text):
         self.text = text
@@ -260,37 +260,31 @@ class RTViewTokenizer():
             name = name_list[ele[0]]
             res.append((name, val))
             pass
-        return res;
+        return {key: res};
         pass
 
 
-# tuple: ("pendingMessageCout: ")
-if __name__ == '__main__':
-    ## pendingMessageCount
-    ## pendingMessageSize
+def lambda_handler(event, context):
+
+    # TODO implement
     t1 = RTViewTokenizer();
     InfoMap = t1.getInfoMap()
-    res = t1.getTopDatas(InfoMap, "pendingMessageCount", 10)
-    print(res)
-    # for i in range(5):
-    #
-    #     InfoMap = t1.getInfoMap() ## not update
-    #     lists_1 = InfoMap["pendingMessageCount"].copy();
-    #     lists_1.sort(reverse=True)
-    #     print("pendingMessageCount : " + str(lists_1[:10]))
-    #
-    #     lists_2 = InfoMap["inboundTotalMessages"].copy();
-    #     lists_2.sort(reverse=True)
-    #     print("inboundTotalMessages: " + str(lists_2[:10]))
+    res = t1.getTopDatas(InfoMap, "pendingMessageCount", 3)
+    return {
+        'statusCode': 200,
+        # 'body': json.dumps('Hello from Lambda!'),
+        'body': res
+    }
 
-    # note: 1. getInfoMap update the response
-    # 2. top 10 -> name
-    # 3. add monitor alarm -> call to slack, email;
-    # 4, python3 call slack notification
-    #
+
+# # tuple: ("pendingMessageCout: ")
+# if __name__ == '__main__':
+#     ## pendingMessageCount
+#     ## pendingMessageSize
+#     t1 = RTViewTokenizer();
+#     InfoMap = t1.getInfoMap()
+#     res = t1.getTopDatas(InfoMap, "pendingMessageCount", 3)
+#     # print(res)
 
 
 
-    new_path = "InfoMap.txt"
-    # with open(new_path, 'w') as outFile:
-    #     outFile.write(str(InfoMap))
