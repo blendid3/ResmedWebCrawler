@@ -1,11 +1,14 @@
 import requests
 from requests.auth import HTTPBasicAuth
-# from botocore.vendored import requests
+import boto3
+
+
 class Token():
     def __init__(self, type, text):
         self.text = text
         self.type = type
         pass
+
     def __eq__(self, other):
         if (self.text == other):
             return True
@@ -13,22 +16,24 @@ class Token():
             return False;
 
     def __str__(self):
-        return {"text" : self.text, "type": self.type}
-
+        return {"text": self.text, "type": self.type}
 
     def getText(self):
         return self.text
+
     def getType(self):
         return self.type
 
     def setText(self, text):
         self.text = text
+
     def setType(self, type):
         self.type = type
 
+
 class RTViewTokenizer():
     def __init__(self):
-        self.url = "http://rtview.053566098740.priv.dht.live/rtview-emsmon-rtvquery/cache/_rtvMulti?queryCount=3&mq1_cache=EmsQueues&mq1_table=current&mq1_cols=URL%3Bname%3BinboundMessageRate%3BinboundTotalMessages%3BoutboundMessageRate%3BoutboundTotalMessages%3BpendingMessageCount%3BconsumerCount%3Bfailsafe%3BfcMaxBytes%3Bglobal%3BinboundByteRate%3BinboundTotalBytes%3BmaxBytes%3BmaxMsgs%3BoutboundByteRate%3BoutboundTotalBytes%3BoverflowPolicy%3Bsecure%3Bstatic%3Bdescription%3BExpired%3Btime_stamp%3BRateinboundTotalBytes%3BRateinboundTotalMessages%3BRateoutboundTotalBytes%3BRateoutboundTotalMessages%3BpendingMessageSize%3Bexclusive%3BmaxRedelivery%3BPattern%3BreceiverCount&mq1_fcol=URL&mq1_fval=*&mq2_cache=RtvAlertStatsByCategoryIndex&mq2_table=current&mq2_cols=Package%3BCategory%3BAlert%20Index%20Values%3BMaxSeverity%3BAlertCount%3Btime_stamp&mq2_fcol=Package%3BCategory&mq2_fval=Ems%3BQueues&mq3_cache=EmsServerInfo&mq3_table=current&mq3_cols=URL%3BqueueCount&mq3_fcol=URL&mq3_fval=*&fmt=jsonp&to=15&arr=1"
+        self.url = "http://rtview.077995606180.priv.dht.live/rtview-emsmon-rtvquery/cache/_rtvMulti?queryCount=3&mq1_cache=EmsQueues&mq1_table=current&mq1_cols=URL%3Bname%3BinboundMessageRate%3BinboundTotalMessages%3BoutboundMessageRate%3BoutboundTotalMessages%3BpendingMessageCount%3BconsumerCount%3Bfailsafe%3BfcMaxBytes%3Bglobal%3BinboundByteRate%3BinboundTotalBytes%3BmaxBytes%3BmaxMsgs%3BoutboundByteRate%3BoutboundTotalBytes%3BoverflowPolicy%3Bsecure%3Bstatic%3Bdescription%3BExpired%3Btime_stamp%3BRateinboundTotalBytes%3BRateinboundTotalMessages%3BRateoutboundTotalBytes%3BRateoutboundTotalMessages%3BpendingMessageSize%3Bexclusive%3BmaxRedelivery%3BPattern%3BreceiverCount&mq1_fcol=URL&mq1_fval=*&mq2_cache=RtvAlertStatsByCategoryIndex&mq2_table=current&mq2_cols=Package%3BCategory%3BAlert%20Index%20Values%3BMaxSeverity%3BAlertCount%3Btime_stamp&mq2_fcol=Package%3BCategory&mq2_fval=Ems%3BQueues&mq3_cache=EmsServerInfo&mq3_table=current&mq3_cols=URL%3BqueueCount&mq3_fcol=URL&mq3_fval=*&fmt=jsonp&to=15&arr=1"
         self.user = 'rtvadmin'
         self.password = 'rtvadmin'
         self.index = 0;
@@ -39,10 +44,11 @@ class RTViewTokenizer():
         self.getFromWebsite();
 
     def getFromWebsite(self):
-        self.response = requests.get(self.url, auth=HTTPBasicAuth( self.user, self.password)).text;
+        self.response = requests.get(self.url, auth=HTTPBasicAuth(self.user, self.password)).text;
         assert isinstance(self.response, str)
         return self.response;
-# *****************************************************************************************
+
+    # *****************************************************************************************
     def getTopLetter(self):
         return self.response[self.index]
 
@@ -52,6 +58,7 @@ class RTViewTokenizer():
             return True
         else:
             return False;
+
     def isFunctions(self, keyword):
         assert isinstance(keyword, str)
         if keyword in self.functions:
@@ -61,10 +68,10 @@ class RTViewTokenizer():
 
     def convertStrByType(self, words):
         type = self.getType(words)
-        if(type == "number"):
+        if (type == "number"):
             return float(words)
         elif type == 'boolean':
-            if(words == 'True' or words == 'true'):
+            if (words == 'True' or words == 'true'):
                 return True;
             else:
                 return False
@@ -73,11 +80,11 @@ class RTViewTokenizer():
 
     def getType(self, words):
         assert isinstance(words, str) or isinstance(words, Token)
-        if(isinstance(words, Token)):
+        if (isinstance(words, Token)):
             return words.getType();
-        if(words[0] == '\"' and words[-1] == "\""):
+        if (words[0] == '\"' and words[-1] == "\""):
             return "str"
-        if(words in self.functions):
+        if (words in self.functions):
             return "function";
         elif words in self.brackets:
             return "bracket"
@@ -89,6 +96,7 @@ class RTViewTokenizer():
             return "boolean"
         else:
             return "unknown"
+
     def isfloat(self, text):
         assert isinstance(text, str)
         try:
@@ -99,21 +107,20 @@ class RTViewTokenizer():
 
     def isboolean(self, text):
         assert isinstance(text, str)
-        if(text == "false" or text == "true" or text == "True" or text == "False"):
+        if (text == "false" or text == "true" or text == "True" or text == "False"):
             return True
         else:
             return False;
 
-
-# ***********************************************************
+    # ***********************************************************
 
     def next(self):
         keyword = "";
-        while(self.index < len(self.response)):
+        while (self.index < len(self.response)):
             letter = self.getTopLetter();
             if (self.isLetterSpecial(letter) or letter == "\""):
                 ## when the last keyword not empty, handle last keyword first
-                if(keyword != ""):
+                if (keyword != ""):
                     type = self.getType(keyword)
                     keyword = self.convertStrByType(keyword)
                     return Token(type=type, text=keyword);
@@ -121,7 +128,7 @@ class RTViewTokenizer():
                 if (letter == "\""):
                     self.index += 1;
                     text = "";
-                    while(self.getTopLetter() != "\""):
+                    while (self.getTopLetter() != "\""):
                         letter = self.getTopLetter()
                         text += letter;
                         self.index += 1;
@@ -141,12 +148,11 @@ class RTViewTokenizer():
             self.index += 1;
         return None;
 
-
     def getTokenLists(self):
         tokenLists = [];
-        while(True):
+        while (True):
             token = self.next();
-            if(token == None):
+            if (token == None):
                 self.index = 0;
                 return tokenLists;
             else:
@@ -160,10 +166,10 @@ class RTViewTokenizer():
         queue_brackets = [];
         queue_brackets.append(tokenList[index].getText())
         index += 1;
-        while(len(queue_brackets) != 0 and index < len(tokenList)):
+        while (len(queue_brackets) != 0 and index < len(tokenList)):
             token = tokenList[index]
-            if(self.getType(token) == 'bracket'):
-                if(token.getText() in self.bracketsMap):
+            if (self.getType(token) == 'bracket'):
+                if (token.getText() in self.bracketsMap):
                     val = self.bracketsMap[token.getText()];
                     if (queue_brackets[-1] != val):
                         raise Exception("getMetaInfo: dataFormat is Wrong")
@@ -171,7 +177,7 @@ class RTViewTokenizer():
                         queue_brackets.pop();
                 else:
                     queue_brackets.append(tokenList[index].getText())
-            elif("name" == token):
+            elif ("name" == token):
                 index += 2;
                 infoLists.append(tokenList[index].getText())
                 pass
@@ -188,11 +194,11 @@ class RTViewTokenizer():
         queue_brackets.append(tokenList[index].getText())
         index += 1;
         infoListItem = []
-        while(len(queue_brackets) != 0 and index < len(tokenList)):
+        while (len(queue_brackets) != 0 and index < len(tokenList)):
 
             token = tokenList[index]
-            if(self.getType(token) == 'bracket'):
-                if(token.getText() in self.bracketsMap):
+            if (self.getType(token) == 'bracket'):
+                if (token.getText() in self.bracketsMap):
                     val = self.bracketsMap[token.getText()];
                     if (queue_brackets[-1] != val):
                         raise Exception("getMetaInfo: dataFormat is Wrong")
@@ -202,37 +208,37 @@ class RTViewTokenizer():
                     infoListItem = [];
                 else:
                     queue_brackets.append(tokenList[index].getText())
-            elif(tokenList[index] != ","):
+            elif (tokenList[index] != ","):
                 # print(tokenList[index].text)
                 infoListItem.append(tokenList[index].getText())
             index += 1;
         # return [infoLists, index];
         return [infoLists[:-1], index];
+
     def getInfoMap(self):
         tokenList = self.getTokenLists();
         i = 0;
         metaInfoList = []
         dataInfoList = []
-        while( i < len(tokenList)):
+        while (i < len(tokenList)):
             token = tokenList[i];
-            if(token == "metadata"):
+            if (token == "metadata"):
                 [metaInfoList, index] = self.getMetaInfo(tokenList, i + 2)
                 i = index;
                 token = tokenList[i];
-            elif(token == "data"):
+            elif (token == "data"):
                 [dataInfoList, index] = self.readData(tokenList, i + 2)
                 i = index;
                 break;
             i += 1
-        if(len(metaInfoList) == 0):
+        if (len(metaInfoList) == 0):
             raise Exception("getInfoMap: Error!! cannot get meta data correctly")
 
-        if(len(dataInfoList) == 0):
+        if (len(dataInfoList) == 0):
             raise Exception("getInfoMap: Error!! cannot get dataInfoLists")
         for i in range(len(dataInfoList)):
             if (len(metaInfoList) != len(dataInfoList[i])):
                 raise Exception("getInfoMap: Error1! metaInfoList lenght is not equal to ")
-
 
         InfoMap = {}
         for ele in metaInfoList:
@@ -256,7 +262,7 @@ class RTViewTokenizer():
         res = []
         name_list = InfoMap['name']
         for ele in new_list:
-            val  = ele[1];
+            val = ele[1];
             name = name_list[ele[0]]
             res.append((name, val))
             pass
@@ -265,26 +271,41 @@ class RTViewTokenizer():
 
 
 def lambda_handler(event, context):
-
     # TODO implement
+    client = boto3.client('ssm')
+    document_name = 'arn:aws:ssm:us-west-2:077995606180:document/blue_toggle_newport_maintenance'
+    parameters_NO = {
+        'EnableMaintenanceMode': [
+            'no',
+        ]
+    }
+
+    parameters_Yes = {
+        'EnableMaintenanceMode': [
+            'yes',
+        ]
+    }
+
     t1 = RTViewTokenizer();
     InfoMap = t1.getInfoMap()
-    res = t1.getTopDatas(InfoMap, "pendingMessageCount", 3)
+    res = t1.getTopDatas(InfoMap, "pendingMessageCount", 4)
+
+    max_pendingMessageCount = 35000
+
+    # tg = boto3.client('elbv2').describe_target_health(TargetGroupArn='arn:aws:elasticloadbalancing:us-west-2:077995606180:targetgroup/blue-newport-alb-tg/24a12db24c699a80')
+
+    toggle_res = None
+    if (res['pendingMessageCount'][0][1] > max_pendingMessageCount):
+        client.start_automation_execution(DocumentName=document_name, Parameters=parameters_Yes)
+        toggle_res = 'Yes'
+    else:
+        client.start_automation_execution(DocumentName=document_name, Parameters=parameters_NO)
+        toggle_res = 'No'
+
+    print("res: " + str(res))
+    print("Toggle File Parameter: " + toggle_res)
     return {
         'statusCode': 200,
         # 'body': json.dumps('Hello from Lambda!'),
         'body': res
     }
-
-
-# # tuple: ("pendingMessageCout: ")
-# if __name__ == '__main__':
-#     ## pendingMessageCount
-#     ## pendingMessageSize
-#     t1 = RTViewTokenizer();
-#     InfoMap = t1.getInfoMap()
-#     res = t1.getTopDatas(InfoMap, "pendingMessageCount", 3)
-#     # print(res)
-
-
-
